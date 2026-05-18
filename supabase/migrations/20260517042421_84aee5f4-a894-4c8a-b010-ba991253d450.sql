@@ -1,0 +1,1 @@
+ALTER TABLE public.pipesend_products ADD COLUMN IF NOT EXISTS sell_link text;
