@@ -112,7 +112,7 @@ export const Route = createFileRoute("/api/auth/youtube/callback")({
         });
         return new Response(null, {
           status: 302,
-          headers: { Location: `/dashboard/connected?${params.toString()}` },
+          headers: { Location: `/yt-connected?${params.toString()}` },
         });
       },
     },

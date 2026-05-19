@@ -54,7 +54,7 @@ export function useCreatorSession() {
       return c;
     },
     enabled: !!local?.id,
-    staleTime: 30_000, // re-check every 30s
+    staleTime: 5 * 60_000, // cache 5 minutes
     retry: false,
   });
 

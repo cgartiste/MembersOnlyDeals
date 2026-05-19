@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { fetchYoutubeChannel, fetchYoutubeVideos } from "@/lib/creator.server";
 import { useCreatorSession } from "@/hooks/use-creator-session";
+import { getCreator } from "@/lib/creator.server";
 import { CreatorSidebar } from "@/components/creator-sidebar";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -29,29 +30,27 @@ function DashboardPage() {
   const fetchChannelFn = useServerFn(fetchYoutubeChannel);
   const fetchVideosFn = useServerFn(fetchYoutubeVideos);
 
-  const creatorQ = useQuery({
-    queryKey: ["creator", session?.id],
-    queryFn: () => getCreatorFn({ data: { id: session!.id } }),
-    enabled: !!session?.id,
-  });
+  const hasYoutube = session?.hasYoutube ?? false;
 
+  // Only fetch YouTube data if channel is connected
   const channelQ = useQuery({
     queryKey: ["yt-channel", session?.id],
     queryFn: () => fetchChannelFn({ data: { creatorId: session!.id } }),
-    enabled: !!session?.id && !!creatorQ.data?.youtube_channel_id,
+    enabled: !!session?.id && hasYoutube,
+    staleTime: 5 * 60_000,
     retry: false,
   });
 
   const videosQ = useQuery({
     queryKey: ["yt-videos", session?.id],
-    queryFn: () => fetchVideosFn({ data: { creatorId: session!.id } }),
-    enabled: !!session?.id && !!creatorQ.data?.youtube_channel_id,
+    queryFn: () => fetchVideosFn({ data: { creatorId: session!.id, maxResults: 8 } }),
+    enabled: !!session?.id && hasYoutube,
+    staleTime: 5 * 60_000,
     retry: false,
   });
 
   const channel = channelQ.data;
   const videos = videosQ.data ?? [];
-  const hasYoutube = session?.hasYoutube ?? false;
 
   return (
     <div className="min-h-screen bg-neutral-50 flex">

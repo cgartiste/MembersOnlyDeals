@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as YtConnectedRouteImport } from './routes/yt-connected'
 import { Route as UploadRouteImport } from './routes/upload'
 import { Route as TagManagerRouteImport } from './routes/tag-manager'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -46,6 +47,11 @@ import { Route as ApiPublicAdcomboOrderRouteImport } from './routes/api/public/a
 import { Route as ApiAuthYoutubeCallbackRouteImport } from './routes/api/auth/youtube.callback'
 import { Route as LayoutAdministratorMailingSystemRouteImport } from './routes/_layout.administrator.mailing.system'
 
+const YtConnectedRoute = YtConnectedRouteImport.update({
+  id: '/yt-connected',
+  path: '/yt-connected',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
   path: '/upload',
@@ -252,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/tag-manager': typeof TagManagerRoute
   '/upload': typeof UploadRoute
+  '/yt-connected': typeof YtConnectedRoute
   '/dashboard/connected': typeof DashboardConnectedRoute
   '/l/$slug': typeof LSlugRoute
   '/newsletter/confirm': typeof NewsletterConfirmRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/tag-manager': typeof TagManagerRoute
   '/upload': typeof UploadRoute
+  '/yt-connected': typeof YtConnectedRoute
   '/dashboard/connected': typeof DashboardConnectedRoute
   '/l/$slug': typeof LSlugRoute
   '/newsletter/confirm': typeof NewsletterConfirmRoute
@@ -327,6 +335,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/tag-manager': typeof TagManagerRoute
   '/upload': typeof UploadRoute
+  '/yt-connected': typeof YtConnectedRoute
   '/dashboard/connected': typeof DashboardConnectedRoute
   '/l/$slug': typeof LSlugRoute
   '/newsletter/confirm': typeof NewsletterConfirmRoute
@@ -366,6 +375,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/tag-manager'
     | '/upload'
+    | '/yt-connected'
     | '/dashboard/connected'
     | '/l/$slug'
     | '/newsletter/confirm'
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/tag-manager'
     | '/upload'
+    | '/yt-connected'
     | '/dashboard/connected'
     | '/l/$slug'
     | '/newsletter/confirm'
@@ -440,6 +451,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/tag-manager'
     | '/upload'
+    | '/yt-connected'
     | '/dashboard/connected'
     | '/l/$slug'
     | '/newsletter/confirm'
@@ -479,6 +491,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   TagManagerRoute: typeof TagManagerRoute
   UploadRoute: typeof UploadRoute
+  YtConnectedRoute: typeof YtConnectedRoute
   LSlugRoute: typeof LSlugRoute
   PSlugRoute: typeof PSlugRoute
   ApiPublicConfirmRoute: typeof ApiPublicConfirmRoute
@@ -490,6 +503,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/yt-connected': {
+      id: '/yt-connected'
+      path: '/yt-connected'
+      fullPath: '/yt-connected'
+      preLoaderRoute: typeof YtConnectedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/upload': {
       id: '/upload'
       path: '/upload'
@@ -830,6 +850,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   TagManagerRoute: TagManagerRoute,
   UploadRoute: UploadRoute,
+  YtConnectedRoute: YtConnectedRoute,
   LSlugRoute: LSlugRoute,
   PSlugRoute: PSlugRoute,
   ApiPublicConfirmRoute: ApiPublicConfirmRoute,
