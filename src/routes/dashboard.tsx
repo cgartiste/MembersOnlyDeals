@@ -5,6 +5,7 @@ import { useState } from "react";
 import {
   Users, Eye, Play, TrendingUp, ThumbsUp, MessageCircle,
   Youtube, Sparkles, ArrowRight, Zap, ChevronRight, Tag, Search,
+  Upload, Settings, RefreshCw,
 } from "lucide-react";
 import { fetchYoutubeChannel, fetchYoutubeVideos } from "@/lib/creator.server";
 import { useCreatorSession } from "@/hooks/use-creator-session";
