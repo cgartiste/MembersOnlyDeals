@@ -209,7 +209,7 @@ Réponds UNIQUEMENT en JSON valide :
       transition_tips: string[]; outro: string; cta: string;
       description: string; tags: string[]; chapters: string[];
       thumbnail_text: string; tweet: string; instagram_caption: string;
-    };
+    }>(raw);
   });
 
 /* ── SEO Optimizer ── */
@@ -242,7 +242,7 @@ NICHE : ${data.niche ?? "générale"}
       description_score: number; description_issues: string[]; description_optimized: string;
       tags_score: number; tags_to_add: string[]; tags_to_remove: string[]; tags_optimized: string[];
       overall_score: number; top_opportunities: string[]; keywords_to_target: string[];
-    };
+    }>(raw);
   });
 
 /* ── Competitor Analysis ── */
@@ -277,7 +277,7 @@ DONNÉES : ${data.topVideos ?? "(non disponible)"}
       title_patterns: string[]; winning_topics: string[]; content_gaps: string[];
       recommended_tags: string[]; video_ideas: string[]; differentiators: string[];
       overall_assessment: string;
-    };
+    }>(raw);
   });
 
 /* ── Content Calendar ── */
@@ -303,7 +303,7 @@ NICHE : ${data.niche} | FRÉQUENCE : ${data.frequency} | MOIS : ${data.month ?? 
     return parseAIJson<{
       videos: Array<{ week: number; day: string; topic: string; type: string; hook_idea: string; thumbnail_concept: string; estimated_views: string }>;
       monthly_theme: string; tips: string[];
-    };
+    }>(raw);
   });
 
 /* ── Video SEO Analysis ── */
@@ -355,5 +355,5 @@ VUES: ${data.views?.toLocaleString() ?? "?"} | LIKES: ${data.likes?.toLocaleStri
       notification_summary: string; notification_color: "red" | "orange" | "yellow" | "green";
       quick_wins: string[]; estimated_views_boost: string; keywords_to_add: string[];
       full_title_analysis: string; full_tags_analysis: string; full_description_analysis: string;
-    };
+    }>(raw);
   });
