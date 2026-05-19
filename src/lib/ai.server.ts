@@ -238,3 +238,80 @@ Réponds UNIQUEMENT en JSON valide :
       tips: string[];
     };
   });
+
+/* ── Analyze a single video SEO (fast — for notification bar) ── */
+export const analyzeVideoSEO = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      videoId: z.string(),
+      title: z.string().max(200),
+      description: z.string().max(2000).optional(),
+      tags: z.array(z.string()).max(200),
+      views: z.number().optional(),
+      likes: z.number().optional(),
+      comments: z.number().optional(),
+      niche: z.string().max(100).optional(),
+      provider: z.enum(["claude", "gemini"]).default("gemini"),
+    }).parse,
+  )
+  .handler(async ({ data }) => {
+    const prompt = `Analyse SEO rapide YouTube pour cette vidéo. Réponds UNIQUEMENT en JSON valide.
+
+TITRE: ${data.title}
+TAGS (${data.tags.length}): ${data.tags.slice(0, 20).join(", ") || "(aucun)"}
+DESCRIPTION: ${data.description?.slice(0, 300) ?? "(vide)"}
+VUES: ${data.views?.toLocaleString() ?? "?"}
+LIKES: ${data.likes?.toLocaleString() ?? "?"}
+
+{
+  "overall_score": 72,
+  "title_score": 80,
+  "tags_score": 60,
+  "description_score": 55,
+  "title_length_ok": true,
+  "title_has_keyword": true,
+  "tags_count": ${data.tags.length},
+  "tags_missing": ["tag manquant 1", "tag manquant 2", "tag manquant 3"],
+  "tags_weak": ["tag faible 1"],
+  "tags_good": ["bon tag 1", "bon tag 2"],
+  "title_suggestion": "Titre amélioré suggéré",
+  "description_missing": true,
+  "top_opportunity": "Description vide — +35% de visibilité possible",
+  "priority": "high",
+  "notification_summary": "3 tags manquants · Titre optimisable · Description vide",
+  "notification_color": "red",
+  "quick_wins": ["Ajouter une description SEO", "Optimiser 3 tags", "Raccourcir le titre"],
+  "estimated_views_boost": "+25-40%",
+  "keywords_to_add": ["mot clé 1", "mot clé 2", "mot clé 3"],
+  "full_title_analysis": "Analyse détaillée du titre...",
+  "full_tags_analysis": "Analyse détaillée des tags...",
+  "full_description_analysis": "Analyse détaillée de la description..."
+}`;
+
+    const raw = await callAI(prompt, data.provider, 2000);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    return JSON.parse(jsonMatch?.[0] ?? raw) as {
+      overall_score: number;
+      title_score: number;
+      tags_score: number;
+      description_score: number;
+      title_length_ok: boolean;
+      title_has_keyword: boolean;
+      tags_count: number;
+      tags_missing: string[];
+      tags_weak: string[];
+      tags_good: string[];
+      title_suggestion: string;
+      description_missing: boolean;
+      top_opportunity: string;
+      priority: "high" | "medium" | "low";
+      notification_summary: string;
+      notification_color: "red" | "orange" | "yellow" | "green";
+      quick_wins: string[];
+      estimated_views_boost: string;
+      keywords_to_add: string[];
+      full_title_analysis: string;
+      full_tags_analysis: string;
+      full_description_analysis: string;
+    };
+  });

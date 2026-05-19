@@ -172,7 +172,7 @@ export const fetchYoutubeVideos = createServerFn({ method: "POST" })
     const ids = (searchJson.items ?? []).map((i) => (i.id as Record<string, unknown>).videoId as string).filter(Boolean);
     if (ids.length === 0) return [];
 
-    // Get video stats
+    // Get video stats + snippet (includes tags, description)
     const videoRes = await fetch(
       `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${ids.join(",")}`,
       { headers: { Authorization: `Bearer ${creator.youtube_access_token}` } },
@@ -182,14 +182,62 @@ export const fetchYoutubeVideos = createServerFn({ method: "POST" })
     return (videoJson.items ?? []).map((v) => {
       const sn = v.snippet as Record<string, unknown>;
       const st = v.statistics as Record<string, unknown>;
+      const tags = (sn.tags as string[] | undefined) ?? [];
       return {
         id: v.id as string,
         title: sn.title as string,
+        description: (sn.description as string | undefined) ?? "",
         thumbnail: ((sn.thumbnails as Record<string, unknown>)?.medium as Record<string, unknown>)?.url as string,
         publishedAt: sn.publishedAt as string,
         views: Number(st.viewCount ?? 0),
         likes: Number(st.likeCount ?? 0),
         comments: Number(st.commentCount ?? 0),
+        tags,
+        tagCount: tags.length,
       };
     });
+  });
+
+/* ── Update video tags via YouTube API ── */
+export const updateVideoTags = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      creatorId: z.string().uuid(),
+      videoId: z.string().min(1),
+      title: z.string().min(1),
+      description: z.string().optional(),
+      tags: z.array(z.string()).max(500),
+    }).parse,
+  )
+  .handler(async ({ data }) => {
+    const creator = await dbFirst<{ youtube_access_token: string | null }>(
+      "SELECT youtube_access_token FROM tubemind_creators WHERE id = ?",
+      [data.creatorId],
+    );
+    if (!creator?.youtube_access_token) throw new Error("Chaîne non connectée.");
+
+    const res = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?part=snippet`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${creator.youtube_access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: data.videoId,
+          snippet: {
+            title: data.title,
+            description: data.description ?? "",
+            tags: data.tags,
+            categoryId: "22", // People & Blogs — adjust as needed
+          },
+        }),
+      },
+    );
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`YouTube API: ${err.slice(0, 200)}`);
+    }
+    return { ok: true };
   });
