@@ -1,33 +1,16 @@
-import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
-  Brain, BarChart3, Search, Tag, RefreshCw, Package, Bell,
-  Upload, CalendarDays, Chrome, LogOut, Users, Eye, Play,
-  TrendingUp, ThumbsUp, MessageCircle, Settings, Youtube,
-  Sparkles, ArrowRight, Zap, ChevronRight,
+  Users, Eye, Play, TrendingUp, ThumbsUp, MessageCircle,
+  Youtube, Sparkles, ArrowRight, Zap, ChevronRight, Tag, Search,
 } from "lucide-react";
-import { toast } from "sonner";
-import { getCreator, fetchYoutubeChannel, fetchYoutubeVideos } from "@/lib/creator.server";
+import { fetchYoutubeChannel, fetchYoutubeVideos } from "@/lib/creator.server";
+import { useCreatorSession } from "@/hooks/use-creator-session";
+import { CreatorSidebar } from "@/components/creator-sidebar";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-
-type Session = { id: string; email: string; name: string | null; hasYoutube: boolean; channelName?: string | null };
-
-const NAV_ITEMS = [
-  { icon: BarChart3,    label: "Dashboard",          href: "/dashboard",   active: true },
-  { icon: Sparkles,     label: "Script AI",           href: "#",            soon: false },
-  { icon: TrendingUp,   label: "SEO Optimizer",       href: "#",            soon: false },
-  { icon: Search,       label: "Competitor Research", href: "#",            soon: false },
-  { icon: Tag,          label: "Tag Manager",         href: "#",            soon: false },
-  { icon: RefreshCw,    label: "Auto-Optimize",       href: "#",            soon: false },
-  { icon: Package,      label: "Bulk Update",         href: "#",            soon: false },
-  { icon: Bell,         label: "Tag Alerts",          href: "#",            soon: false },
-  { icon: Upload,       label: "Upload Manager",      href: "#",            soon: false },
-  { icon: CalendarDays, label: "Content Calendar",    href: "#",            soon: false },
-  { icon: Chrome,       label: "Chrome Extension",    href: "#",            soon: false },
-];
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — TubeMind" }] }),
@@ -38,17 +21,10 @@ export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
-function getSession(): Session | null {
-  if (typeof window === "undefined") return null;
-  try { return JSON.parse(localStorage.getItem("creator_session") ?? "null") as Session; }
-  catch { return null; }
-}
-
 function DashboardPage() {
-  const session = getSession();
+  const { session, logout } = useCreatorSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const getCreatorFn = useServerFn(getCreator);
   const fetchChannelFn = useServerFn(fetchYoutubeChannel);
   const fetchVideosFn = useServerFn(fetchYoutubeVideos);
 
@@ -72,66 +48,13 @@ function DashboardPage() {
     retry: false,
   });
 
-  function handleLogout() {
-    localStorage.removeItem("creator_session");
-    window.location.href = "/";
-  }
-
-  const creator = creatorQ.data;
   const channel = channelQ.data;
   const videos = videosQ.data ?? [];
-  const hasYoutube = !!creator?.youtube_channel_id;
+  const hasYoutube = session?.hasYoutube ?? false;
 
   return (
     <div className="min-h-screen bg-neutral-50 flex">
-      {/* Sidebar */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-white border-r border-neutral-200 h-screen sticky top-0">
-        {/* Logo */}
-        <div className="flex items-center gap-2.5 px-5 py-5 border-b border-neutral-100">
-          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-violet-600 to-pink-500 flex items-center justify-center shadow">
-            <Brain className="h-4 w-4 text-white" />
-          </div>
-          <span className="text-base font-extrabold tracking-tight">
-            Tube<span className="text-violet-600">Mind</span>
-          </span>
-        </div>
-
-        {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
-          {NAV_ITEMS.map(({ icon: Icon, label, href, active, soon }) => (
-            <Link key={label} to={href as "/dashboard"}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors group ${
-                active
-                  ? "bg-violet-50 text-violet-700 font-semibold"
-                  : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
-              }`}>
-              <Icon className={`h-4 w-4 shrink-0 ${active ? "text-violet-600" : ""}`} />
-              <span className="flex-1 truncate">{label}</span>
-              {soon && (
-                <span className="text-[9px] uppercase px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-600 font-semibold">
-                  Soon
-                </span>
-              )}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Plan badge */}
-        <div className="p-4 border-t border-neutral-100 space-y-3">
-          <div className="rounded-xl bg-gradient-to-br from-violet-600 to-pink-500 p-3 text-white text-xs">
-            <div className="font-bold mb-0.5">Plan Free</div>
-            <div className="opacity-80 mb-2">2 analyses restantes ce mois</div>
-            <Button size="sm" className="w-full h-7 bg-white text-violet-700 hover:bg-white/90 border-0 text-xs font-semibold">
-              Passer en Creator $19/mois
-            </Button>
-          </div>
-          <button onClick={handleLogout}
-            className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-neutral-400 hover:text-neutral-600 rounded-lg hover:bg-neutral-50 transition-colors">
-            <LogOut className="h-3.5 w-3.5" />
-            <span>Déconnexion</span>
-          </button>
-        </div>
-      </aside>
+      <CreatorSidebar session={session ?? {}} onLogout={logout} />
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
