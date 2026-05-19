@@ -1,309 +1,384 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Play, CheckCircle2, Mail } from "lucide-react";
-import { subscribeNewsletter } from "@/lib/subscribers.functions";
-import { listPublicOffers } from "@/lib/public.functions";
+import {
+  Brain, BarChart3, Search, Tag, RefreshCw, Package, Bell,
+  Upload, CalendarDays, Chrome, CheckCircle2, ArrowRight,
+  Sparkles, TrendingUp, Users, Zap, Star,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Affilix — Exceptional deals that make customers stand out" },
-      { name: "description", content: "Affilix curates exceptional, time-limited deals from trusted brands. Join free and get the best offers in your inbox." },
-      { property: "og:title", content: "Affilix — Exceptional deals" },
-      { property: "og:description", content: "Curated, time-limited affiliate offers from trusted brands." },
+      { title: "TubeMind — The AI Platform Built for YouTubers" },
+      { name: "description", content: "Grow your YouTube channel with AI. Script generation, SEO optimization, competitor analysis, bulk tag management and direct upload — all in one platform." },
+      { property: "og:title", content: "TubeMind — The AI Platform Built for YouTubers" },
+      { property: "og:description", content: "Script AI, analytics, competitor research, tag management & YouTube upload. Everything a creator needs." },
     ],
   }),
   component: HomePage,
 });
 
+const FEATURES = [
+  { icon: Brain,        title: "Script AI",             desc: "Transform any topic into a full optimized script with hooks, CTAs, and chapters in seconds.", tag: "Most popular" },
+  { icon: BarChart3,    title: "Analytics Dashboard",   desc: "Real-time stats: views, CTR, retention, estimated revenue and audience insights." },
+  { icon: Search,       title: "Competitor Research",   desc: "See what's working for top creators in your niche — titles, tags, strategies." },
+  { icon: Tag,          title: "Tag Gap Analysis",      desc: "Find tags your competitors have that you're missing. Get more visibility instantly." },
+  { icon: RefreshCw,    title: "Auto-Optimize",         desc: "Your existing videos are automatically re-optimized every week. No manual work.", tag: "Unique" },
+  { icon: Package,      title: "Bulk Update",           desc: "Update tags, titles or descriptions on 50+ videos at once. 16 hours of work in 30 seconds." },
+  { icon: Bell,         title: "Tag Alerts",            desc: "Get notified the moment a competitor changes their tags or title. React first." },
+  { icon: Upload,       title: "Upload Manager",        desc: "Upload videos directly to YouTube with AI-generated title, description and tags pre-filled." },
+  { icon: CalendarDays, title: "Content Calendar",      desc: "Plan your editorial schedule. Never run out of video ideas with AI suggestions." },
+  { icon: Chrome,       title: "Chrome Extension",      desc: "See stats and competitor data directly on YouTube pages without leaving your browser." },
+];
+
+const PLANS = [
+  {
+    name: "Free",
+    price: "$0",
+    period: "",
+    desc: "Get started. No credit card.",
+    cta: "Start for free",
+    features: ["2 analyses / month", "Chrome extension", "Basic analytics", "Script generator (3/month)"],
+    highlight: false,
+  },
+  {
+    name: "Creator",
+    price: "$19",
+    period: "/month",
+    desc: "For growing channels.",
+    cta: "Start Creator",
+    features: ["20 videos / month", "Full tag management", "Auto-optimize weekly", "Competitor research", "Bulk update (50 videos)", "Tag gap analysis", "Upload manager"],
+    highlight: true,
+  },
+  {
+    name: "Pro",
+    price: "$49",
+    period: "/month",
+    desc: "For serious creators & agencies.",
+    cta: "Start Pro",
+    features: ["Unlimited videos", "Everything in Creator", "Real-time tag alerts", "Multi-channel support", "Priority AI processing", "API access", "Dedicated support"],
+    highlight: false,
+  },
+];
+
+const STATS = [
+  { value: "10x", label: "faster SEO optimization" },
+  { value: "3h", label: "saved per video on average" },
+  { value: "+47%", label: "average CTR improvement" },
+  { value: "1 click", label: "to update 50 videos" },
+];
+
 function HomePage() {
-  const subscribe = useServerFn(subscribeNewsletter);
-  const fetchOffers = useServerFn(listPublicOffers);
-  const offersQ = useQuery({ queryKey: ["public-offers"], queryFn: () => fetchOffers() });
   const [email, setEmail] = useState("");
-  const [done, setDone] = useState<{ already: boolean } | null>(null);
-
-  const m = useMutation({
-    mutationFn: () => subscribe({ data: { email } }),
-    onSuccess: (r) => setDone({ already: !!r.alreadyConfirmed }),
-  });
-
-  const brands = offersQ.data?.slice(0, 6) ?? [];
-  const heroImages = (offersQ.data ?? []).filter((o) => o.image_url).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-white text-neutral-900 overflow-x-hidden">
-      {/* Nav */}
-      <header className="relative z-30">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between text-sm">
-          <div className="flex items-center gap-6">
-            <a href="#how" className="font-medium hover:opacity-70">Learn More</a>
-            <a href="#brands" className="font-medium hover:opacity-70">Partners</a>
+
+      {/* ── NAV ── */}
+      <header className="sticky top-0 z-50 border-b border-neutral-100 bg-white/90 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-violet-600 to-pink-500 flex items-center justify-center shadow">
+              <Brain className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-lg font-extrabold tracking-tight">
+              Tube<span className="text-violet-600">Mind</span>
+            </span>
           </div>
-          <Link to="/" className="text-2xl font-extrabold tracking-tight">
-            Affilix<span className="text-rose-500">.</span>club
-          </Link>
-          <div className="flex items-center gap-6">
-            <a href="#brands" className="font-medium hover:opacity-70">Brands</a>
-            <a href="#signup" className="font-medium hover:opacity-70">Join</a>
+
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-600">
+            <a href="#features" className="hover:text-violet-600 transition-colors">Features</a>
+            <a href="#how" className="hover:text-violet-600 transition-colors">How it works</a>
+            <a href="#pricing" className="hover:text-violet-600 transition-colors">Pricing</a>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <Link to="/login">
+              <Button variant="ghost" size="sm" className="text-sm">Sign in</Button>
+            </Link>
+            <a href="#pricing">
+              <Button size="sm" className="bg-gradient-to-r from-violet-600 to-pink-500 hover:opacity-90 text-white border-0 gap-1.5 text-sm">
+                Get started <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </a>
           </div>
         </div>
       </header>
 
-      {/* HERO */}
-      <section className="relative">
-        {/* Pink spray blob (left) */}
-        <div
-          aria-hidden
-          className="absolute -top-10 -left-20 w-[640px] h-[640px] opacity-90 pointer-events-none"
-          style={{
-            background: "radial-gradient(closest-side, rgba(255,182,206,0.95), rgba(255,182,206,0.55) 45%, rgba(255,182,206,0) 75%)",
-            filter: "blur(2px)",
-            transform: "rotate(-12deg)",
-          }}
-        />
-        {/* Red spray stroke (right) — stylized 'M'-like swoosh via SVG */}
-        <svg
-          aria-hidden
-          viewBox="0 0 600 500"
-          className="absolute -top-4 right-0 w-[720px] h-[560px] pointer-events-none opacity-90"
-        >
-          <defs>
-            <filter id="spray">
-              <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3" />
-              <feDisplacementMap in="SourceGraphic" scale="14" />
-            </filter>
-          </defs>
-          <path
-            d="M40 380 Q 160 60, 260 320 T 480 200 Q 540 100, 560 380"
-            stroke="#ef3b48"
-            strokeWidth="70"
-            strokeLinecap="round"
-            fill="none"
-            filter="url(#spray)"
-            opacity="0.85"
-          />
-        </svg>
+      {/* ── HERO ── */}
+      <section className="relative overflow-hidden">
+        {/* Background gradient blobs */}
+        <div aria-hidden className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full opacity-20 pointer-events-none"
+          style={{ background: "radial-gradient(closest-side, #7c5cff, transparent)" }} />
+        <div aria-hidden className="absolute -top-20 -right-40 w-[600px] h-[600px] rounded-full opacity-15 pointer-events-none"
+          style={{ background: "radial-gradient(closest-side, #ec4899, transparent)" }} />
 
-        <div className="relative max-w-7xl mx-auto px-6 pt-6 pb-24">
-          <h1 className="relative text-5xl md:text-7xl lg:text-[88px] font-extrabold tracking-[-0.02em] leading-[1.02] max-w-5xl mx-auto text-center">
-            <span className="inline-block">Exclusive deals</span>{" "}
-            {heroImages[0] && (
-              <span
-                className="inline-block align-middle mx-2 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-black/5 -rotate-6"
-                style={{ width: 120, height: 78 }}
-              >
-                <img src={heroImages[0].image_url!} alt="" className="h-full w-full object-cover" />
-              </span>
-            )}{" "}
-            <span className="inline-block">that make</span>{" "}
-            {heroImages[1] && (
-              <span
-                className="inline-block align-middle mx-2 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-black/5 rotate-3"
-                style={{ width: 120, height: 78 }}
-              >
-                <img src={heroImages[1].image_url!} alt="" className="h-full w-full object-cover" />
-              </span>
-            )}{" "}
-            <span className="inline-block">customers</span>{" "}
-            {heroImages[2] && (
-              <span
-                className="inline-block align-middle mx-2 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-black/5 -rotate-3"
-                style={{ width: 120, height: 78 }}
-              >
-                <img src={heroImages[2].image_url!} alt="" className="h-full w-full object-cover" />
-              </span>
-            )}{" "}
-            <span className="inline-block">save big</span>
+        <div className="relative max-w-5xl mx-auto px-6 pt-20 pb-28 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-4 py-1.5 text-sm font-medium text-violet-700 mb-8">
+            <Sparkles className="h-3.5 w-3.5" />
+            Powered by Claude AI
+          </div>
+
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05]">
+            The AI studio built{" "}
+            <span className="bg-gradient-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent">
+              for YouTubers
+            </span>
           </h1>
 
-          {/* CTA pills */}
-          <div className="relative mt-14 flex items-center justify-center gap-3">
-            <a
-              href="#signup"
-              className="rounded-full bg-[#3753ff] text-white px-5 py-2.5 text-sm font-semibold shadow-md hover:bg-[#2640e8] transition"
-            >
-              Join free
+          <p className="mt-6 text-lg md:text-xl text-neutral-500 max-w-2xl mx-auto leading-relaxed">
+            Script generation, SEO optimization, competitor analysis, bulk tag management
+            and direct YouTube upload — all in one platform.
+          </p>
+
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <div className="flex h-12 w-full max-w-xs overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="flex-1 px-4 text-sm outline-none"
+              />
+            </div>
+            <a href="#pricing">
+              <Button className="h-12 px-6 bg-gradient-to-r from-violet-600 to-pink-500 hover:opacity-90 text-white border-0 font-semibold gap-2 whitespace-nowrap">
+                <Zap className="h-4 w-4" /> Start for free
+              </Button>
             </a>
           </div>
-        </div>
-      </section>
 
-      {/* BRANDS */}
-      <section id="brands" className="relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div
-            className="rounded-3xl px-8 py-12 md:py-14"
-            style={{ background: "linear-gradient(180deg,#ffe9ef 0%, #ffffff 100%)" }}
-          >
-            <div className="grid md:grid-cols-2 gap-10 items-start">
-              <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.05]">
-                Brands{" "}
-                <span className="inline-flex align-middle h-10 w-10 md:h-12 md:w-12 rounded-xl bg-rose-500 text-white items-center justify-center text-xl">
-                  ❤
-                </span>{" "}
-                we work with
-              </h2>
-              <p className="text-neutral-600 text-base max-w-md md:mt-3">
-                We partner with trusted brands to bring you bold, time-limited offers
-                you won't find anywhere else. One inbox. Zero noise.
-              </p>
-            </div>
+          <p className="mt-3 text-xs text-neutral-400">No credit card required · Free forever plan</p>
 
-            <div className="mt-10 flex gap-5 overflow-x-auto pb-2 snap-x">
-              {brands.length > 0 ? brands.map((b) => (
-                <div
-                  key={b.id}
-                  className="relative shrink-0 w-[240px] h-[180px] rounded-2xl overflow-hidden bg-neutral-100 snap-start group"
-                >
-                  {b.image_url ? (
-                    <img src={b.image_url} alt={b.name ?? ""} className="h-full w-full object-cover group-hover:scale-105 transition-transform" />
-                  ) : (
-                    <div className="h-full w-full bg-gradient-to-br from-rose-100 to-amber-100" />
-                  )}
-                  <div className="absolute top-3 right-3 h-7 w-7 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow">
-                    <Play className="h-3 w-3 fill-neutral-900 text-neutral-900" />
-                  </div>
-                  <div className="absolute bottom-3 left-3 inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-semibold shadow">
-                    {b.name ?? "Offer"}
-                  </div>
+          {/* Social proof avatars */}
+          <div className="mt-10 flex items-center justify-center gap-3">
+            <div className="flex -space-x-2">
+              {["#7c5cff","#ec4899","#3b82f6","#10b981","#f59e0b"].map((c, i) => (
+                <div key={i} className="h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold text-white" style={{ background: c }}>
+                  {["JD","SM","AR","KL","TB"][i]}
                 </div>
-              )) : (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="shrink-0 w-[240px] h-[180px] rounded-2xl bg-neutral-100 animate-pulse snap-start" />
-                ))
-              )}
+              ))}
+            </div>
+            <div className="text-sm text-neutral-500">
+              <span className="font-semibold text-neutral-900">2,400+</span> creators already using TubeMind
             </div>
           </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS — stacked cards */}
-      <section id="how" className="max-w-7xl mx-auto px-6 py-24">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-center tracking-tight">Our Services</h2>
-
-        <div className="relative mt-14 max-w-3xl mx-auto">
-          {/* Card 1 — blue */}
-          <ServiceCard
-            number="01"
-            title="Curated Deals"
-            description="We hand-pick exclusive, time-limited deals from trusted affiliate brands so you only see what's worth your time."
-            bullets={["Daily handpicked offers", "Verified brands only", "No spam, ever", "Exclusive member pricing"]}
-            bg="bg-[#c7d4ff]"
-            rotate="-rotate-1"
-            offsetY="translate-y-0"
-          />
-          {/* Card 2 — white */}
-          <ServiceCard
-            number="02"
-            title="Daily Drops"
-            description="New offers drop every day. Get notified the moment something hot goes live so you never miss out."
-            bullets={["Inbox alerts", "Stock-limited drops", "Early access perks", "One-click claim"]}
-            bg="bg-white border border-neutral-200"
-            rotate="rotate-1"
-            offsetY="-mt-16 translate-x-12"
-          />
-          {/* Card 3 — red */}
-          <ServiceCard
-            number="03"
-            title="Member Rewards"
-            description="The more you engage, the more you save. Unlock bonus codes and stacked discounts as a VIP member."
-            bullets={["Stackable bonus codes", "VIP-only flash sales", "Referral kickbacks", "Lifetime free access"]}
-            bg="bg-[#ff5b59] text-white"
-            rotate="-rotate-1"
-            offsetY="-mt-16"
-            light
-          />
-        </div>
-      </section>
-
-      {/* SIGNUP */}
-      <section id="signup" className="max-w-7xl mx-auto px-6 pb-24">
-        <div className="relative overflow-hidden rounded-3xl bg-neutral-900 text-white px-8 md:px-14 py-16">
-          <div
-            aria-hidden
-            className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full opacity-50 blur-3xl"
-            style={{ background: "radial-gradient(closest-side, #ff5b59, transparent 70%)" }}
-          />
-          <div className="relative max-w-2xl">
-            <div className="text-xs font-semibold uppercase tracking-widest text-rose-400">Join free</div>
-            <h2 className="text-3xl md:text-5xl font-extrabold mt-3 leading-tight">
-              Get tomorrow's best deals — today.
-            </h2>
-            <p className="mt-3 text-neutral-300 max-w-lg">
-              Drop your email. We'll send only the offers worth your time. Unsubscribe in one click.
-            </p>
-            {done ? (
-              <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-emerald-500/20 border border-emerald-400/40 px-4 py-2 text-emerald-200 font-semibold">
-                <CheckCircle2 className="h-4 w-4" />
-                {done.already ? "You're already on the list." : "Check your inbox to confirm."}
+      {/* ── STATS ── */}
+      <section className="border-y border-neutral-100 bg-gradient-to-r from-violet-50 via-white to-pink-50">
+        <div className="max-w-5xl mx-auto px-6 py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {STATS.map(({ value, label }) => (
+              <div key={label} className="text-center">
+                <div className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent">
+                  {value}
+                </div>
+                <div className="mt-1 text-sm text-neutral-500">{label}</div>
               </div>
-            ) : (
-              <form
-                onSubmit={(e) => { e.preventDefault(); if (email) m.mutate(); }}
-                className="mt-6 flex flex-col sm:flex-row gap-2 max-w-md"
-              >
-                <Input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="h-12 bg-white text-neutral-900 border-0"
-                />
-                <Button type="submit" disabled={m.isPending} className="h-12 px-6 bg-rose-500 hover:bg-rose-600 text-white border-0 font-semibold gap-2">
-                  <Mail className="h-4 w-4" /> {m.isPending ? "…" : "Join free"}
-                </Button>
-              </form>
-            )}
-            {m.isError && <p className="text-sm text-rose-300 mt-2">{(m.error as Error).message}</p>}
+            ))}
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-neutral-200">
-        <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-neutral-600">
-          <div>© {new Date().getFullYear()} Affilix.club — All rights reserved</div>
-          <div className="flex gap-5">
-            <a href="#signup" className="hover:text-neutral-900">Join</a>
+      {/* ── FEATURES ── */}
+      <section id="features" className="max-w-7xl mx-auto px-6 py-24">
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700 mb-4">
+            <TrendingUp className="h-3 w-3" /> 10 powerful features
+          </div>
+          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+            Everything your channel needs to{" "}
+            <span className="bg-gradient-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent">
+              grow faster
+            </span>
+          </h2>
+          <p className="mt-4 text-neutral-500">
+            Replace 6 different tools with one platform. TubeMind does the heavy lifting so you can focus on creating.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {FEATURES.map(({ icon: Icon, title, desc, tag }) => (
+            <div key={title}
+              className="group relative rounded-2xl border border-neutral-200 bg-white p-6 hover:border-violet-300 hover:shadow-lg hover:shadow-violet-100 transition-all duration-200">
+              {tag && (
+                <span className="absolute top-4 right-4 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">
+                  {tag}
+                </span>
+              )}
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-100 to-pink-100 flex items-center justify-center mb-4 group-hover:from-violet-200 group-hover:to-pink-200 transition-colors">
+                <Icon className="h-5 w-5 text-violet-600" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">{title}</h3>
+              <p className="text-sm text-neutral-500 leading-relaxed">{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section id="how" className="bg-gradient-to-br from-violet-50 via-white to-pink-50 py-24">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+              How TubeMind works
+            </h2>
+            <p className="mt-4 text-neutral-500">From zero to optimized in 3 steps.</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                step: "01",
+                icon: Chrome,
+                title: "Connect your channel",
+                desc: "Sign in with Google and give TubeMind access to your YouTube channel. The Chrome extension activates instantly.",
+                color: "from-violet-500 to-violet-600",
+              },
+              {
+                step: "02",
+                icon: Brain,
+                title: "Let AI analyze everything",
+                desc: "Claude AI scans your videos, your competitors, trending topics and identifies every growth opportunity.",
+                color: "from-pink-500 to-rose-600",
+              },
+              {
+                step: "03",
+                icon: TrendingUp,
+                title: "Watch your channel grow",
+                desc: "Apply suggestions with one click or let auto-optimize run weekly. Higher CTR, more views, less work.",
+                color: "from-violet-600 to-pink-500",
+              },
+            ].map(({ step, icon: Icon, title, desc, color }) => (
+              <div key={step} className="relative">
+                <div className="text-7xl font-extrabold text-neutral-100 absolute -top-4 -left-2">{step}</div>
+                <div className="relative rounded-2xl bg-white border border-neutral-200 p-7 shadow-sm">
+                  <div className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center mb-5 shadow-lg`}>
+                    <Icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-bold text-lg mb-3">{title}</h3>
+                  <p className="text-sm text-neutral-500 leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PRICING ── */}
+      <section id="pricing" className="max-w-6xl mx-auto px-6 py-24">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+            Simple, transparent pricing
+          </h2>
+          <p className="mt-4 text-neutral-500">Start free. Upgrade when you're ready to scale.</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 items-start">
+          {PLANS.map((plan) => (
+            <div key={plan.name}
+              className={`relative rounded-2xl p-8 ${
+                plan.highlight
+                  ? "bg-gradient-to-br from-violet-600 to-pink-500 text-white shadow-2xl shadow-violet-200 scale-105"
+                  : "border border-neutral-200 bg-white"
+              }`}>
+              {plan.highlight && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-amber-400 text-amber-900 px-4 py-1 text-xs font-bold shadow-lg">
+                  <Star className="h-3 w-3 fill-amber-900" /> Most popular
+                </div>
+              )}
+
+              <div className={`text-sm font-semibold uppercase tracking-wide mb-2 ${plan.highlight ? "text-white/70" : "text-violet-600"}`}>
+                {plan.name}
+              </div>
+              <div className={`text-4xl font-extrabold mb-1 ${plan.highlight ? "text-white" : "text-neutral-900"}`}>
+                {plan.price}
+                <span className={`text-base font-normal ${plan.highlight ? "text-white/60" : "text-neutral-400"}`}>{plan.period}</span>
+              </div>
+              <p className={`text-sm mb-6 ${plan.highlight ? "text-white/70" : "text-neutral-500"}`}>{plan.desc}</p>
+
+              <Button
+                className={`w-full h-11 font-semibold mb-6 ${
+                  plan.highlight
+                    ? "bg-white text-violet-600 hover:bg-white/90 border-0"
+                    : "bg-gradient-to-r from-violet-600 to-pink-500 text-white border-0 hover:opacity-90"
+                }`}>
+                {plan.cta}
+              </Button>
+
+              <ul className="space-y-2.5">
+                {plan.features.map((f) => (
+                  <li key={f} className={`flex items-center gap-2.5 text-sm ${plan.highlight ? "text-white/90" : "text-neutral-600"}`}>
+                    <CheckCircle2 className={`h-4 w-4 shrink-0 ${plan.highlight ? "text-white" : "text-violet-500"}`} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── FINAL CTA ── */}
+      <section className="max-w-7xl mx-auto px-6 pb-24">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-violet-700 to-pink-600 text-white px-10 md:px-20 py-20 text-center shadow-2xl shadow-violet-200">
+          <div aria-hidden className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full opacity-20 blur-3xl bg-white" />
+          <div aria-hidden className="absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full opacity-20 blur-3xl bg-pink-300" />
+          <div className="relative">
+            <div className="flex justify-center mb-6">
+              <div className="h-14 w-14 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur">
+                <Brain className="h-7 w-7 text-white" />
+              </div>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+              Ready to grow your channel?
+            </h2>
+            <p className="mt-4 text-white/70 max-w-lg mx-auto">
+              Join 2,400+ creators who use TubeMind to save time, rank higher and grow faster on YouTube.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+              <a href="#pricing">
+                <Button className="h-12 px-8 bg-white text-violet-700 hover:bg-white/90 border-0 font-bold gap-2">
+                  <Zap className="h-4 w-4" /> Start for free — no card needed
+                </Button>
+              </a>
+              <a href="#features">
+                <Button variant="outline" className="h-12 px-8 border-white/30 text-white hover:bg-white/10 bg-transparent">
+                  See all features
+                </Button>
+              </a>
+            </div>
+            <div className="mt-5 flex items-center justify-center gap-6 text-sm text-white/60">
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> Free forever plan</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> No credit card</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> Cancel anytime</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="border-t border-neutral-100">
+        <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-neutral-500">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-violet-600 to-pink-500 flex items-center justify-center">
+              <Brain className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="font-semibold text-neutral-900">TubeMind</span>
+            <span className="text-neutral-300">·</span>
+            <span>© {new Date().getFullYear()} All rights reserved</span>
+          </div>
+          <div className="flex gap-6">
+            <a href="#features" className="hover:text-violet-600 transition-colors">Features</a>
+            <a href="#pricing" className="hover:text-violet-600 transition-colors">Pricing</a>
+            <Link to="/newsletter" className="hover:text-violet-600 transition-colors">Newsletter</Link>
+            <Link to="/login" className="hover:text-violet-600 transition-colors">Sign in</Link>
           </div>
         </div>
       </footer>
-    </div>
-  );
-}
-
-function ServiceCard({
-  number, title, description, bullets, bg, rotate, offsetY, light = false,
-}: {
-  number: string; title: string; description: string; bullets: string[];
-  bg: string; rotate: string; offsetY: string; light?: boolean;
-}) {
-  return (
-    <div className={`relative ${offsetY} ${rotate} ${bg} rounded-3xl p-8 md:p-10 shadow-xl`}>
-      <div className="grid md:grid-cols-2 gap-6">
-        <div>
-          <div className="text-3xl md:text-4xl font-extrabold tracking-tight">
-            {number} {title}
-          </div>
-          <p className={`mt-4 text-sm ${light ? "text-white/90" : "text-neutral-700"} max-w-sm`}>
-            {description}
-          </p>
-        </div>
-        <ul className={`text-sm space-y-1.5 ${light ? "text-white/95" : "text-neutral-700"}`}>
-          {bullets.map((b) => (
-            <li key={b} className="flex items-start gap-2">
-              <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-70" />
-              {b}
-            </li>
-          ))}
-        </ul>
-      </div>
     </div>
   );
 }
