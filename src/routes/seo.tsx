@@ -522,9 +522,14 @@ export default function SEOPage() {
                     placeholder="Rechercher une vidéo…"
                     className="flex-1 h-9"
                   />
-                  {videosQ.isLoading
-                    ? <span className="text-xs text-neutral-400 whitespace-nowrap flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Chargement…</span>
-                    : <span className="text-xs text-neutral-400 whitespace-nowrap">{videos.length} vidéo{videos.length > 1 ? "s" : ""}</span>
+                  {videosQ.isLoading ? (
+                    <span className="text-xs text-neutral-400 whitespace-nowrap flex items-center gap-1">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Chargement…
+                    </span>
+                  ) : (
+                    <span className="text-xs text-neutral-400 whitespace-nowrap">
+                      {videos.length}{' '}{videos.length !== 1 ? 'vidéos' : 'vidéo'}
+                    </span>
                   )}
                   <Button size="sm" variant="outline" onClick={() => videosQ.refetch()} className="gap-1 h-9">
                     <RefreshCw className={`h-3.5 w-3.5 ${videosQ.isFetching ? "animate-spin" : ""}`} />
