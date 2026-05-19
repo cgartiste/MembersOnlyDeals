@@ -2,14 +2,17 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Settings, Youtube, User, Lock, Bell, CreditCard, CheckCircle2, Loader2, Trash2 } from "lucide-react";
+import { Settings, Youtube, User, Lock, Bell, CreditCard, CheckCircle2, Loader2, Trash2, Brain, ExternalLink, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { getCreator } from "@/lib/creator.server";
+import { checkAIProviders, testAIProvider, AI_MODELS, type AIProvider } from "@/lib/ai.server";
+import { AIProviderSelect, PROVIDER_META } from "@/components/ai-provider-select";
 import { CreatorSidebar } from "@/components/creator-sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -42,6 +45,40 @@ export default function CreatorSettingsPage() {
 
   const [name, setName] = useState(session?.name ?? "");
   const [notifs, setNotifs] = useState({ email: true, tagAlerts: true, weeklyReport: true });
+
+  // IA settings
+  const checkProvidersFn = useServerFn(checkAIProviders);
+  const testProviderFn = useServerFn(testAIProvider);
+  const storedProvider = typeof window !== "undefined"
+    ? (localStorage.getItem("preferred_ai_provider") as AIProvider ?? "gemini") : "gemini";
+  const storedModel = typeof window !== "undefined"
+    ? (localStorage.getItem("preferred_ai_model") ?? "") : "";
+  const [aiProvider, setAiProvider] = useState<AIProvider>(storedProvider);
+  const [aiModel, setAiModel] = useState(storedModel);
+  const [testResult, setTestResult] = useState<{ ok: boolean; response?: string; latencyMs?: number; error?: string } | null>(null);
+  const [testing, setTesting] = useState(false);
+
+  const providersQ = useQuery({ queryKey: ["ai-providers"], queryFn: () => checkProvidersFn(), staleTime: 30_000 });
+
+  function saveAIPrefs() {
+    localStorage.setItem("preferred_ai_provider", aiProvider);
+    if (aiModel) localStorage.setItem("preferred_ai_model", aiModel);
+    else localStorage.removeItem("preferred_ai_model");
+    toast.success(`IA par défaut : ${PROVIDER_META[aiProvider].name}${aiModel ? ` — ${aiModel}` : ""}`);
+  }
+
+  async function testConnection() {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const r = await testProviderFn({ data: { provider: aiProvider, model: aiModel || undefined } });
+      setTestResult({ ok: true, response: r.response, latencyMs: r.latencyMs });
+    } catch (e) {
+      setTestResult({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setTesting(false);
+    }
+  }
 
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "";
   const APP_URL = import.meta.env.VITE_APP_URL ?? "http://localhost:8080";
@@ -76,6 +113,7 @@ export default function CreatorSettingsPage() {
                 <TabsTrigger value="profile" className="gap-1.5"><User className="h-3.5 w-3.5" /> Profil</TabsTrigger>
                 <TabsTrigger value="youtube" className="gap-1.5"><Youtube className="h-3.5 w-3.5" /> YouTube</TabsTrigger>
                 <TabsTrigger value="notifs" className="gap-1.5"><Bell className="h-3.5 w-3.5" /> Notifications</TabsTrigger>
+                <TabsTrigger value="ia" className="gap-1.5"><Brain className="h-3.5 w-3.5" /> IA</TabsTrigger>
                 <TabsTrigger value="plan" className="gap-1.5"><CreditCard className="h-3.5 w-3.5" /> Plan</TabsTrigger>
               </TabsList>
 
@@ -188,6 +226,97 @@ export default function CreatorSettingsPage() {
               </TabsContent>
 
               {/* Plan */}
+              {/* IA Settings */}
+              <TabsContent value="ia" className="mt-4 space-y-5">
+                <div className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-5">
+                  <div>
+                    <h3 className="font-semibold flex items-center gap-2"><Brain className="h-4 w-4 text-violet-500" /> Fournisseur IA par défaut</h3>
+                    <p className="text-xs text-neutral-500 mt-1">Choisi par défaut sur toutes les pages IA. Tu peux changer à la volée sur chaque page.</p>
+                  </div>
+
+                  <AIProviderSelect value={aiProvider} onChange={(v) => { setAiProvider(v); setAiModel(""); setTestResult(null); }} />
+
+                  {/* Model selector */}
+                  {AI_MODELS[aiProvider].length > 1 && (
+                    <div className="space-y-1.5">
+                      <Label className="text-sm">Modèle</Label>
+                      <Select value={aiModel || AI_MODELS[aiProvider][0].id} onValueChange={setAiModel}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {AI_MODELS[aiProvider].map(m => (
+                            <SelectItem key={m.id} value={m.id}>
+                              {m.label}
+                              {m.free && <span className="ml-2 text-[10px] text-emerald-600 font-bold">GRATUIT</span>}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* Test + Save */}
+                  <div className="flex gap-2">
+                    <Button onClick={testConnection} disabled={testing || !providersQ.data?.[aiProvider]}
+                      variant="outline" className="gap-2">
+                      {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                      {testing ? "Test en cours…" : "Tester la connexion"}
+                    </Button>
+                    <Button onClick={saveAIPrefs} className="bg-gradient-to-r from-violet-600 to-pink-500 text-white border-0 gap-2">
+                      <CheckCircle2 className="h-4 w-4" /> Sauvegarder
+                    </Button>
+                  </div>
+
+                  {/* Test result */}
+                  {testResult && (
+                    <div className={`rounded-xl border p-3 text-sm ${testResult.ok ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-700"}`}>
+                      {testResult.ok ? (
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          <span>Connexion OK · Réponse : "<strong>{testResult.response}</strong>" · {testResult.latencyMs}ms</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-start gap-2">
+                          <span className="text-red-500 shrink-0">✗</span>
+                          <span>{testResult.error}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* API Keys guide */}
+                <div className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">
+                  <h3 className="font-semibold">Clés API — Comment les obtenir</h3>
+                  <div className="space-y-3">
+                    {(Object.entries(PROVIDER_META) as Array<[AIProvider, typeof PROVIDER_META[AIProvider]]>).map(([id, meta]) => {
+                      const configured = providersQ.data?.[id];
+                      return (
+                        <div key={id} className={`flex items-center justify-between p-3 rounded-xl border ${configured ? "border-emerald-200 bg-emerald-50" : "border-neutral-200 bg-neutral-50"}`}>
+                          <div className="flex items-center gap-3">
+                            <div className={`text-xs px-2 py-0.5 rounded-lg font-bold bg-gradient-to-r ${meta.color} text-white`}>{meta.name}</div>
+                            <div>
+                              <div className="text-sm font-medium">{configured ? "✅ Configurée" : "❌ Non configurée"}</div>
+                              <div className="text-[11px] text-neutral-500">Variable : {id === "claude" ? "ANTHROPIC_API_KEY" : id === "gemini" ? "GEMINI_API_KEY" : id === "groq" ? "GROQ_API_KEY" : "OPENROUTER_API_KEY"}</div>
+                            </div>
+                          </div>
+                          <a href={meta.getKeyUrl} target="_blank" rel="noopener noreferrer">
+                            <Button size="sm" variant="outline" className="gap-1.5 text-xs h-7">
+                              <ExternalLink className="h-3 w-3" /> Obtenir la clé
+                            </Button>
+                          </a>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800 space-y-1">
+                    <div className="font-bold">Pour ajouter une clé API :</div>
+                    <div>1. Ouvre le fichier <code className="bg-amber-100 px-1 rounded">.env</code> dans ton projet</div>
+                    <div>2. Remplis la variable correspondante (ex: <code className="bg-amber-100 px-1 rounded">GROQ_API_KEY="gsk_..."</code>)</div>
+                    <div>3. Redémarre le serveur dev</div>
+                  </div>
+                </div>
+              </TabsContent>
+
               <TabsContent value="plan" className="mt-4 space-y-4">
                 {PLANS.map(plan => (
                   <div key={plan.id} className={`rounded-2xl border p-5 ${session?.plan === plan.id ? "border-violet-300 bg-violet-50" : "border-neutral-200 bg-white"}`}>
