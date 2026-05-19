@@ -30,7 +30,6 @@ import { Route as NewsletterIndexRouteImport } from './routes/newsletter.index'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as NewsletterConfirmRouteImport } from './routes/newsletter.confirm'
 import { Route as LSlugRouteImport } from './routes/l.$slug'
-import { Route as DashboardConnectedRouteImport } from './routes/dashboard.connected'
 import { Route as LayoutAdministratorIndexRouteImport } from './routes/_layout.administrator.index'
 import { Route as ApiWebhooksMailgunRouteImport } from './routes/api/webhooks/mailgun'
 import { Route as ApiPublicUnsubscribeRouteImport } from './routes/api/public/unsubscribe'
@@ -151,11 +150,6 @@ const LSlugRoute = LSlugRouteImport.update({
   path: '/l/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardConnectedRoute = DashboardConnectedRouteImport.update({
-  id: '/connected',
-  path: '/connected',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const LayoutAdministratorIndexRoute =
   LayoutAdministratorIndexRouteImport.update({
     id: '/administrator/',
@@ -249,7 +243,7 @@ export interface FileRoutesByFullPath {
   '/competitors': typeof CompetitorsRoute
   '/creator-login': typeof CreatorLoginRoute
   '/creator-settings': typeof CreatorSettingsRoute
-  '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/newsletter': typeof NewsletterRouteWithChildren
   '/onboarding': typeof OnboardingRoute
@@ -259,7 +253,6 @@ export interface FileRoutesByFullPath {
   '/tag-manager': typeof TagManagerRoute
   '/upload': typeof UploadRoute
   '/yt-connected': typeof YtConnectedRoute
-  '/dashboard/connected': typeof DashboardConnectedRoute
   '/l/$slug': typeof LSlugRoute
   '/newsletter/confirm': typeof NewsletterConfirmRoute
   '/p/$slug': typeof PSlugRoute
@@ -287,7 +280,7 @@ export interface FileRoutesByTo {
   '/competitors': typeof CompetitorsRoute
   '/creator-login': typeof CreatorLoginRoute
   '/creator-settings': typeof CreatorSettingsRoute
-  '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/script': typeof ScriptRoute
@@ -296,7 +289,6 @@ export interface FileRoutesByTo {
   '/tag-manager': typeof TagManagerRoute
   '/upload': typeof UploadRoute
   '/yt-connected': typeof YtConnectedRoute
-  '/dashboard/connected': typeof DashboardConnectedRoute
   '/l/$slug': typeof LSlugRoute
   '/newsletter/confirm': typeof NewsletterConfirmRoute
   '/p/$slug': typeof PSlugRoute
@@ -326,7 +318,7 @@ export interface FileRoutesById {
   '/competitors': typeof CompetitorsRoute
   '/creator-login': typeof CreatorLoginRoute
   '/creator-settings': typeof CreatorSettingsRoute
-  '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/newsletter': typeof NewsletterRouteWithChildren
   '/onboarding': typeof OnboardingRoute
@@ -336,7 +328,6 @@ export interface FileRoutesById {
   '/tag-manager': typeof TagManagerRoute
   '/upload': typeof UploadRoute
   '/yt-connected': typeof YtConnectedRoute
-  '/dashboard/connected': typeof DashboardConnectedRoute
   '/l/$slug': typeof LSlugRoute
   '/newsletter/confirm': typeof NewsletterConfirmRoute
   '/p/$slug': typeof PSlugRoute
@@ -376,7 +367,6 @@ export interface FileRouteTypes {
     | '/tag-manager'
     | '/upload'
     | '/yt-connected'
-    | '/dashboard/connected'
     | '/l/$slug'
     | '/newsletter/confirm'
     | '/p/$slug'
@@ -413,7 +403,6 @@ export interface FileRouteTypes {
     | '/tag-manager'
     | '/upload'
     | '/yt-connected'
-    | '/dashboard/connected'
     | '/l/$slug'
     | '/newsletter/confirm'
     | '/p/$slug'
@@ -452,7 +441,6 @@ export interface FileRouteTypes {
     | '/tag-manager'
     | '/upload'
     | '/yt-connected'
-    | '/dashboard/connected'
     | '/l/$slug'
     | '/newsletter/confirm'
     | '/p/$slug'
@@ -482,7 +470,7 @@ export interface RootRouteChildren {
   CompetitorsRoute: typeof CompetitorsRoute
   CreatorLoginRoute: typeof CreatorLoginRoute
   CreatorSettingsRoute: typeof CreatorSettingsRoute
-  DashboardRoute: typeof DashboardRouteWithChildren
+  DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   NewsletterRoute: typeof NewsletterRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
@@ -650,13 +638,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/connected': {
-      id: '/dashboard/connected'
-      path: '/connected'
-      fullPath: '/dashboard/connected'
-      preLoaderRoute: typeof DashboardConnectedRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/_layout/administrator/': {
       id: '/_layout/administrator/'
       path: '/administrator'
@@ -807,18 +788,6 @@ const LayoutRouteChildren: LayoutRouteChildren = {
 const LayoutRouteWithChildren =
   LayoutRoute._addFileChildren(LayoutRouteChildren)
 
-interface DashboardRouteChildren {
-  DashboardConnectedRoute: typeof DashboardConnectedRoute
-}
-
-const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardConnectedRoute: DashboardConnectedRoute,
-}
-
-const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
-  DashboardRouteChildren,
-)
-
 interface NewsletterRouteChildren {
   NewsletterConfirmRoute: typeof NewsletterConfirmRoute
   NewsletterIndexRoute: typeof NewsletterIndexRoute
@@ -841,7 +810,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompetitorsRoute: CompetitorsRoute,
   CreatorLoginRoute: CreatorLoginRoute,
   CreatorSettingsRoute: CreatorSettingsRoute,
-  DashboardRoute: DashboardRouteWithChildren,
+  DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   NewsletterRoute: NewsletterRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
