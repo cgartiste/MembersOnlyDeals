@@ -26,25 +26,42 @@ async function callClaude(prompt: string, maxTokens = 4096): Promise<string> {
   return json.content[0]?.text ?? "";
 }
 
-async function callGemini(prompt: string, maxTokens = 4096): Promise<string> {
+async function callGemini(prompt: string, maxTokens = 4096, retries = 3): Promise<string> {
   const key = process.env.GEMINI_API_KEY;
   if (!key || key === "your-gemini-api-key-here") throw new Error("GEMINI_API_KEY non configurée. Obtenir sur aistudio.google.com/app/apikey");
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 },
-      }),
-    },
-  );
-  if (!res.ok) throw new Error(`Gemini API [${res.status}]: ${await res.text()}`);
-  const json = await res.json() as {
-    candidates?: Array<{ content?: { parts?: Array<{ text: string }> } }>;
-  };
-  return json.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 },
+        }),
+      },
+    );
+
+    if (res.status === 429) {
+      const body = await res.text();
+      const match = body.match(/retry in ([\d.]+)s/i);
+      const waitSec = match ? Math.ceil(parseFloat(match[1])) + 2 : Math.pow(2, attempt + 1) * 5;
+      if (attempt < retries) {
+        console.warn(`[Gemini] Rate limited (429). Waiting ${waitSec}s before retry ${attempt + 1}/${retries}...`);
+        await new Promise(r => setTimeout(r, waitSec * 1_000));
+        continue;
+      }
+      throw new Error(`Gemini API [429]: Quota dépassé. Réessayez dans ${waitSec}s ou activez la facturation sur aistudio.google.com`);
+    }
+
+    if (!res.ok) throw new Error(`Gemini API [${res.status}]: ${(await res.text()).slice(0, 300)}`);
+    const json = await res.json() as {
+      candidates?: Array<{ content?: { parts?: Array<{ text: string }> } }>;
+    };
+    return json.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  }
+  throw new Error("Gemini: max retries exceeded");
 }
 
 async function callAI(prompt: string, provider: AIProvider, maxTokens = 4096): Promise<string> {

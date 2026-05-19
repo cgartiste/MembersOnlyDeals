@@ -1,7 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { aiQueue, withRetry } from "@/lib/ai-queue";
 import {
   TrendingUp, Eye, ThumbsUp, MessageCircle, Tag, Loader2,
   AlertTriangle, CheckCircle2, ChevronRight, Sparkles, Copy,
@@ -74,27 +75,41 @@ function VideoRow({
   const analyzeFn = useServerFn(analyzeVideoSEO);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [queued, setQueued] = useState(false);
+  const cancelRef = useRef(false);
 
-  // Auto-analyze when visible
-  useEffect(() => {
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      if (cancelled || analysis) return;
+  function requestAnalysis() {
+    if (analyzing || queued || analysis) return;
+    cancelRef.current = false;
+    setQueued(true);
+    aiQueue.enqueue(async () => {
+      if (cancelRef.current) { setQueued(false); return; }
+      setQueued(false);
       setAnalyzing(true);
       try {
-        const result = await analyzeFn({
+        const result = await withRetry(() => analyzeFn({
           data: {
             videoId: video.id, title: video.title, description: video.description,
             tags: video.tags, views: video.views, likes: video.likes,
             comments: video.comments, provider,
           },
-        });
-        if (!cancelled) setAnalysis(result);
-      } catch { /* silently fail */ }
-      finally { if (!cancelled) setAnalyzing(false); }
-    }, Math.random() * 800 + 200); // stagger requests
-    return () => { cancelled = true; clearTimeout(timer); };
-  }, [video.id, provider]);
+        }));
+        if (!cancelRef.current) setAnalysis(result);
+      } catch (e) {
+        if (!cancelRef.current) console.warn("[SEO] Analysis failed:", e);
+      } finally {
+        if (!cancelRef.current) setAnalyzing(false);
+      }
+    });
+  }
+
+  // Reset analysis when provider changes
+  useEffect(() => {
+    cancelRef.current = true;
+    setAnalysis(null);
+    setAnalyzing(false);
+    setQueued(false);
+  }, [provider]);
 
   const notifColor = analysis?.notification_color ?? "yellow";
 
@@ -127,11 +142,23 @@ function VideoRow({
           </div>
 
           {/* AI Notification Bar */}
-          <div className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs ${analyzing ? "bg-neutral-50 border-neutral-200" : NOTIF_COLORS[notifColor]}`}>
-            {analyzing ? (
+          <div
+            className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs cursor-pointer transition-colors ${
+              analyzing || queued ? "bg-violet-50 border-violet-200"
+              : analysis ? NOTIF_COLORS[notifColor]
+              : "bg-neutral-50 border-neutral-200 hover:bg-violet-50 hover:border-violet-200"
+            }`}
+            onClick={!analysis && !analyzing && !queued ? requestAnalysis : undefined}
+          >
+            {queued ? (
+              <>
+                <div className="h-2 w-2 rounded-full bg-violet-400 animate-pulse shrink-0" />
+                <span className="text-violet-500 font-medium">En attente dans la file…</span>
+              </>
+            ) : analyzing ? (
               <>
                 <Loader2 className="h-3 w-3 animate-spin text-violet-500 shrink-0" />
-                <span className="text-neutral-400">Analyse IA en cours…</span>
+                <span className="text-violet-600 font-medium">Analyse IA en cours…</span>
               </>
             ) : analysis ? (
               <>
@@ -140,11 +167,19 @@ function VideoRow({
                 {analysis.estimated_views_boost && (
                   <span className="shrink-0 font-bold opacity-70">{analysis.estimated_views_boost}</span>
                 )}
+                <button
+                  onClick={e => { e.stopPropagation(); setAnalysis(null); requestAnalysis(); }}
+                  className="shrink-0 text-neutral-400 hover:text-neutral-600"
+                  title="Relancer l'analyse"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                </button>
               </>
             ) : (
               <>
-                <Sparkles className="h-3 w-3 text-violet-400 shrink-0" />
-                <span className="text-neutral-400">Analyse IA en attente…</span>
+                <Sparkles className="h-3 w-3 text-neutral-400 shrink-0" />
+                <span className="text-neutral-400">Cliquer pour analyser avec l'IA</span>
+                <span className="ml-auto text-[10px] text-violet-400 font-medium">→ Analyser</span>
               </>
             )}
           </div>
@@ -459,6 +494,9 @@ function VideoDetailPanel({
   );
 }
 
+// Refs to trigger analysis from outside VideoRow
+const analyzeCallbacks = new Map<string, () => void>();
+
 export default function SEOPage() {
   const session = typeof window !== "undefined"
     ? JSON.parse(localStorage.getItem("creator_session") ?? "null") as Session
@@ -467,6 +505,7 @@ export default function SEOPage() {
   const [provider, setProvider] = useState<AIProvider>("gemini");
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [search, setSearch] = useState("");
+  const [analyzingAll, setAnalyzingAll] = useState(false);
 
   const fetchVideosFn = useServerFn(fetchYoutubeVideos);
   const videosQ = useQuery({
@@ -496,7 +535,22 @@ export default function SEOPage() {
               <p className="text-xs text-neutral-400">Analysez et optimisez chaque vidéo avec l'IA</p>
             </div>
           </div>
-          <AIProviderSelect value={provider} onChange={setProvider} />
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm" variant="outline"
+              className="gap-1.5 h-8 text-xs"
+              disabled={analyzingAll}
+              onClick={() => {
+                setAnalyzingAll(true);
+                analyzeCallbacks.forEach(fn => fn());
+                setTimeout(() => setAnalyzingAll(false), 3000);
+              }}
+            >
+              {analyzingAll ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+              Analyser toutes
+            </Button>
+            <AIProviderSelect value={provider} onChange={setProvider} />
+          </div>
         </header>
 
         <main className="flex-1 p-6 overflow-hidden">
