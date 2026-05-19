@@ -3,6 +3,39 @@ import { z } from "zod";
 
 export type AIProvider = "claude" | "gemini" | "groq" | "openrouter";
 
+// Robust JSON extractor — handles markdown code blocks and nested braces
+function extractJSON(raw: string): string {
+  // Remove markdown code blocks: ```json ... ``` or ``` ... ```
+  let cleaned = raw.replace(/```(?:json)?\s*([\s\S]*?)```/g, "$1").trim();
+  // Find the outermost JSON object
+  const start = cleaned.indexOf("{");
+  if (start === -1) return raw;
+  let depth = 0;
+  let end = -1;
+  for (let i = start; i < cleaned.length; i++) {
+    if (cleaned[i] === "{") depth++;
+    else if (cleaned[i] === "}") {
+      depth--;
+      if (depth === 0) { end = i; break; }
+    }
+  }
+  if (end === -1) return cleaned.slice(start);
+  return cleaned.slice(start, end + 1);
+}
+
+function parseAIJson<T>(raw: string): T {
+  const jsonStr = extractJSON(raw);
+  try {
+    return JSON.parse(jsonStr) as T;
+  } catch (e) {
+    // Try to fix common Groq/LLM JSON issues: trailing commas, unquoted keys
+    const fixed = jsonStr
+      .replace(/,\s*([}\]])/g, "$1")   // trailing commas
+      .replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":'); // unquoted keys
+    return JSON.parse(fixed) as T;
+  }
+}
+
 export const AI_MODELS: Record<AIProvider, Array<{ id: string; label: string; free?: boolean }>> = {
   claude: [
     { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6" },
@@ -170,8 +203,7 @@ Réponds UNIQUEMENT en JSON valide :
   "instagram_caption": "Légende Instagram + hashtags"
 }`;
     const raw = await callAI(prompt, data.provider as AIProvider, 6000, data.model);
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    return JSON.parse(jsonMatch?.[0] ?? raw) as {
+    return parseAIJson<{
       title_options: string[]; hook: string; intro: string;
       sections: Array<{ title: string; content: string; duration: string }>;
       transition_tips: string[]; outro: string; cta: string;
@@ -205,8 +237,7 @@ NICHE : ${data.niche ?? "générale"}
   "overall_score": 62, "top_opportunities": ["Opportunité 1","Opportunité 2"], "keywords_to_target": ["mot clé 1","mot clé 2"]
 }`;
     const raw = await callAI(prompt, data.provider as AIProvider, 3000, data.model);
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    return JSON.parse(jsonMatch?.[0] ?? raw) as {
+    return parseAIJson<{
       title_score: number; title_issues: string[]; title_suggestions: string[];
       description_score: number; description_issues: string[]; description_optimized: string;
       tags_score: number; tags_to_add: string[]; tags_to_remove: string[]; tags_optimized: string[];
@@ -241,8 +272,7 @@ DONNÉES : ${data.topVideos ?? "(non disponible)"}
   "overall_assessment": "Évaluation"
 }`;
     const raw = await callAI(prompt, data.provider as AIProvider, 3000, data.model);
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    return JSON.parse(jsonMatch?.[0] ?? raw) as {
+    return parseAIJson<{
       content_strategy: string; posting_frequency: string;
       title_patterns: string[]; winning_topics: string[]; content_gaps: string[];
       recommended_tags: string[]; video_ideas: string[]; differentiators: string[];
@@ -270,8 +300,7 @@ NICHE : ${data.niche} | FRÉQUENCE : ${data.frequency} | MOIS : ${data.month ?? 
   "tips": ["Conseil 1","Conseil 2","Conseil 3"]
 }`;
     const raw = await callAI(prompt, data.provider as AIProvider, 4000, data.model);
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    return JSON.parse(jsonMatch?.[0] ?? raw) as {
+    return parseAIJson<{
       videos: Array<{ week: number; day: string; topic: string; type: string; hook_idea: string; thumbnail_concept: string; estimated_views: string }>;
       monthly_theme: string; tips: string[];
     };
@@ -317,8 +346,7 @@ VUES: ${data.views?.toLocaleString() ?? "?"} | LIKES: ${data.likes?.toLocaleStri
   "full_description_analysis": "Analyse description détaillée..."
 }`;
     const raw = await callAI(prompt, data.provider as AIProvider, 2000, data.model);
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    return JSON.parse(jsonMatch?.[0] ?? raw) as {
+    return parseAIJson<{
       overall_score: number; title_score: number; tags_score: number; description_score: number;
       title_length_ok: boolean; title_has_keyword: boolean; tags_count: number;
       tags_missing: string[]; tags_weak: string[]; tags_good: string[];
