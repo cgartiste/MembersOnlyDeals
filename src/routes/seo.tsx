@@ -4,7 +4,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { TrendingUp, Loader2, Check, Copy, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { optimizeSEO } from "@/lib/claude.server";
+import { optimizeSEO, type AIProvider } from "@/lib/ai.server";
+import { AIProviderSelect } from "@/components/ai-provider-select";
 import { CreatorSidebar } from "@/components/creator-sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,11 +56,12 @@ function CopyBtn({ text }: { text: string }) {
 export default function SEOPage() {
   const session = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("creator_session") ?? "null") as Session : null;
   const optimizeFn = useServerFn(optimizeSEO);
+  const [provider, setProvider] = useState<AIProvider>("gemini");
   const [form, setForm] = useState({ title: "", description: "", tags: "", niche: "" });
   const [result, setResult] = useState<Awaited<ReturnType<typeof optimizeFn>> | null>(null);
 
   const m = useMutation({
-    mutationFn: () => optimizeFn({ data: form }),
+    mutationFn: () => optimizeFn({ data: { ...form, provider } }),
     onSuccess: setResult,
     onError: (e: Error) => toast.error(e.message),
   });
@@ -82,6 +84,7 @@ export default function SEOPage() {
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
             <div className="rounded-2xl border border-neutral-200 bg-white p-5 space-y-4 h-fit">
               <h2 className="font-semibold">Métadonnées actuelles</h2>
+              <AIProviderSelect value={provider} onChange={setProvider} />
               <div className="space-y-1.5">
                 <Label>Titre actuel *</Label>
                 <Input value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="Le titre actuel de votre vidéo" />

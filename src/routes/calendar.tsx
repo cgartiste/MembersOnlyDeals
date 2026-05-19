@@ -4,7 +4,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { CalendarDays, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { generateCalendar } from "@/lib/claude.server";
+import { generateCalendar, type AIProvider } from "@/lib/ai.server";
+import { AIProviderSelect } from "@/components/ai-provider-select";
 import { CreatorSidebar } from "@/components/creator-sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,11 +33,12 @@ export const Route = createFileRoute("/calendar")({
 export default function CalendarPage() {
   const session = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("creator_session") ?? "null") : null;
   const genFn = useServerFn(generateCalendar);
+  const [provider, setProvider] = useState<AIProvider>("gemini");
   const [form, setForm] = useState({ niche: "", frequency: "2/week" as const, month: "" });
   const [result, setResult] = useState<Awaited<ReturnType<typeof genFn>> | null>(null);
 
   const m = useMutation({
-    mutationFn: () => genFn({ data: form }),
+    mutationFn: () => genFn({ data: { ...form, provider } }),
     onSuccess: setResult,
     onError: (e: Error) => toast.error(e.message),
   });
@@ -81,7 +83,8 @@ export default function CalendarPage() {
                   <Label>Mois</Label>
                   <Input value={form.month} onChange={e => setForm({...form, month: e.target.value})} placeholder="Juin 2025" />
                 </div>
-                <Button onClick={() => m.mutate()} disabled={!form.niche || m.isPending}
+                <AIProviderSelect value={provider} onChange={setProvider} />
+              <Button onClick={() => m.mutate()} disabled={!form.niche || m.isPending}
                   className="h-10 bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-0 font-semibold gap-2">
                   {m.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {m.isPending ? "Génération…" : "Générer le calendrier"}

@@ -4,7 +4,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Sparkles, Copy, Check, Loader2, ChevronDown, ChevronUp, Download } from "lucide-react";
 import { toast } from "sonner";
-import { generateScript } from "@/lib/claude.server";
+import { generateScript, type AIProvider } from "@/lib/ai.server";
+import { AIProviderSelect } from "@/components/ai-provider-select";
 import { CreatorSidebar } from "@/components/creator-sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,11 +60,12 @@ export default function ScriptPage() {
   const session = getSession();
   const genFn = useServerFn(generateScript);
 
+  const [provider, setProvider] = useState<AIProvider>("gemini");
   const [form, setForm] = useState({ topic: "", niche: "", duration: "8-12min" as const, style: "educational" as const, audience: "", language: "fr" as const });
   const [result, setResult] = useState<Awaited<ReturnType<typeof genFn>> | null>(null);
 
   const m = useMutation({
-    mutationFn: () => genFn({ data: form }),
+    mutationFn: () => genFn({ data: { ...form, provider } }),
     onSuccess: (r) => setResult(r),
     onError: (e: Error) => toast.error(e.message),
   });
@@ -89,7 +91,10 @@ export default function ScriptPage() {
             {/* Form */}
             <div className="space-y-4">
               <div className="rounded-2xl border border-neutral-200 bg-white p-5 space-y-4">
-                <h2 className="font-semibold">Paramètres du script</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="font-semibold">Paramètres du script</h2>
+                </div>
+                <AIProviderSelect value={provider} onChange={setProvider} />
                 <div className="space-y-1.5">
                   <Label>Sujet / Topic *</Label>
                   <Textarea value={form.topic} onChange={e => setForm({...form, topic: e.target.value})}

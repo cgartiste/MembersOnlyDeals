@@ -4,7 +4,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Search, Loader2, Copy, Check, Lightbulb, Target, Tag } from "lucide-react";
 import { toast } from "sonner";
-import { analyzeCompetitor } from "@/lib/claude.server";
+import { analyzeCompetitor, type AIProvider } from "@/lib/ai.server";
+import { AIProviderSelect } from "@/components/ai-provider-select";
 import { CreatorSidebar } from "@/components/creator-sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,11 +35,12 @@ function CopyBtn({ text }: { text: string }) {
 export default function CompetitorsPage() {
   const session = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("creator_session") ?? "null") : null;
   const analyzeFn = useServerFn(analyzeCompetitor);
+  const [provider, setProvider] = useState<AIProvider>("gemini");
   const [form, setForm] = useState({ channelName: "", niche: "", topVideos: "" });
   const [result, setResult] = useState<Awaited<ReturnType<typeof analyzeFn>> | null>(null);
 
   const m = useMutation({
-    mutationFn: () => analyzeFn({ data: form }),
+    mutationFn: () => analyzeFn({ data: { ...form, provider } }),
     onSuccess: setResult,
     onError: (e: Error) => toast.error(e.message),
   });
@@ -61,6 +63,7 @@ export default function CompetitorsPage() {
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
             <div className="rounded-2xl border border-neutral-200 bg-white p-5 space-y-4 h-fit">
               <h2 className="font-semibold">Analyser un concurrent</h2>
+              <AIProviderSelect value={provider} onChange={setProvider} />
               <div className="space-y-1.5">
                 <Label>Nom de la chaîne *</Label>
                 <Input value={form.channelName} onChange={e => setForm({...form, channelName: e.target.value})}
