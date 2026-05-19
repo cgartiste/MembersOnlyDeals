@@ -26,7 +26,7 @@ const SCOPES = [
   "https://www.googleapis.com/auth/youtube.readonly",
 ].join(" ");
 
-function buildOAuthUrl(): string {
+function buildOAuthUrl(creatorId?: string): string {
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
     redirect_uri: REDIRECT_URI,
@@ -34,7 +34,7 @@ function buildOAuthUrl(): string {
     scope: SCOPES,
     access_type: "offline",
     prompt: "consent",
-    state: "tubemind_youtube_connect",
+    state: creatorId ? `tubemind_youtube_connect:${creatorId}` : "tubemind_youtube_connect",
   });
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
@@ -51,7 +51,10 @@ function OnboardingPage() {
       alert("Google Client ID non configuré. Ajoutez VITE_GOOGLE_CLIENT_ID dans .env");
       return;
     }
-    window.location.href = buildOAuthUrl();
+    const creatorId = typeof window !== "undefined"
+      ? (JSON.parse(localStorage.getItem("creator_session") ?? "{}") as { id?: string }).id
+      : undefined;
+    window.location.href = buildOAuthUrl(creatorId);
   }
 
   return (

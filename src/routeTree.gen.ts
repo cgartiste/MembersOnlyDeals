@@ -9,8 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UploadRouteImport } from './routes/upload'
+import { Route as TagManagerRouteImport } from './routes/tag-manager'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SeoRouteImport } from './routes/seo'
+import { Route as ScriptRouteImport } from './routes/script'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NewsletterRouteImport } from './routes/newsletter'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CreatorSettingsRouteImport } from './routes/creator-settings'
+import { Route as CreatorLoginRouteImport } from './routes/creator-login'
+import { Route as CompetitorsRouteImport } from './routes/competitors'
+import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as IndexRouteImport } from './routes/index'
@@ -18,6 +29,7 @@ import { Route as NewsletterIndexRouteImport } from './routes/newsletter.index'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as NewsletterConfirmRouteImport } from './routes/newsletter.confirm'
 import { Route as LSlugRouteImport } from './routes/l.$slug'
+import { Route as DashboardConnectedRouteImport } from './routes/dashboard.connected'
 import { Route as LayoutAdministratorIndexRouteImport } from './routes/_layout.administrator.index'
 import { Route as ApiWebhooksMailgunRouteImport } from './routes/api/webhooks/mailgun'
 import { Route as ApiPublicUnsubscribeRouteImport } from './routes/api/public/unsubscribe'
@@ -31,8 +43,39 @@ import { Route as LayoutAdministratorLandingsRouteImport } from './routes/_layou
 import { Route as LayoutAdministratorDashboardRouteImport } from './routes/_layout.administrator.dashboard'
 import { Route as LayoutAdministratorAddProductRouteImport } from './routes/_layout.administrator.add-product'
 import { Route as ApiPublicAdcomboOrderRouteImport } from './routes/api/public/adcombo.order'
+import { Route as ApiAuthYoutubeCallbackRouteImport } from './routes/api/auth/youtube.callback'
 import { Route as LayoutAdministratorMailingSystemRouteImport } from './routes/_layout.administrator.mailing.system'
 
+const UploadRoute = UploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TagManagerRoute = TagManagerRouteImport.update({
+  id: '/tag-manager',
+  path: '/tag-manager',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeoRoute = SeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScriptRoute = ScriptRouteImport.update({
+  id: '/script',
+  path: '/script',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NewsletterRoute = NewsletterRouteImport.update({
   id: '/newsletter',
   path: '/newsletter',
@@ -41,6 +84,31 @@ const NewsletterRoute = NewsletterRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreatorSettingsRoute = CreatorSettingsRouteImport.update({
+  id: '/creator-settings',
+  path: '/creator-settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreatorLoginRoute = CreatorLoginRouteImport.update({
+  id: '/creator-login',
+  path: '/creator-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompetitorsRoute = CompetitorsRouteImport.update({
+  id: '/competitors',
+  path: '/competitors',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -76,6 +144,11 @@ const LSlugRoute = LSlugRouteImport.update({
   id: '/l/$slug',
   path: '/l/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardConnectedRoute = DashboardConnectedRouteImport.update({
+  id: '/connected',
+  path: '/connected',
+  getParentRoute: () => DashboardRoute,
 } as any)
 const LayoutAdministratorIndexRoute =
   LayoutAdministratorIndexRouteImport.update({
@@ -151,6 +224,11 @@ const ApiPublicAdcomboOrderRoute = ApiPublicAdcomboOrderRouteImport.update({
   path: '/api/public/adcombo/order',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthYoutubeCallbackRoute = ApiAuthYoutubeCallbackRouteImport.update({
+  id: '/api/auth/youtube/callback',
+  path: '/api/auth/youtube/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LayoutAdministratorMailingSystemRoute =
   LayoutAdministratorMailingSystemRouteImport.update({
     id: '/system',
@@ -161,8 +239,20 @@ const LayoutAdministratorMailingSystemRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/calendar': typeof CalendarRoute
+  '/competitors': typeof CompetitorsRoute
+  '/creator-login': typeof CreatorLoginRoute
+  '/creator-settings': typeof CreatorSettingsRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/newsletter': typeof NewsletterRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
+  '/script': typeof ScriptRoute
+  '/seo': typeof SeoRoute
+  '/signup': typeof SignupRoute
+  '/tag-manager': typeof TagManagerRoute
+  '/upload': typeof UploadRoute
+  '/dashboard/connected': typeof DashboardConnectedRoute
   '/l/$slug': typeof LSlugRoute
   '/newsletter/confirm': typeof NewsletterConfirmRoute
   '/p/$slug': typeof PSlugRoute
@@ -180,12 +270,25 @@ export interface FileRoutesByFullPath {
   '/api/webhooks/mailgun': typeof ApiWebhooksMailgunRoute
   '/administrator/': typeof LayoutAdministratorIndexRoute
   '/administrator/mailing/system': typeof LayoutAdministratorMailingSystemRoute
+  '/api/auth/youtube/callback': typeof ApiAuthYoutubeCallbackRoute
   '/api/public/adcombo/order': typeof ApiPublicAdcomboOrderRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/calendar': typeof CalendarRoute
+  '/competitors': typeof CompetitorsRoute
+  '/creator-login': typeof CreatorLoginRoute
+  '/creator-settings': typeof CreatorSettingsRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/script': typeof ScriptRoute
+  '/seo': typeof SeoRoute
+  '/signup': typeof SignupRoute
+  '/tag-manager': typeof TagManagerRoute
+  '/upload': typeof UploadRoute
+  '/dashboard/connected': typeof DashboardConnectedRoute
   '/l/$slug': typeof LSlugRoute
   '/newsletter/confirm': typeof NewsletterConfirmRoute
   '/p/$slug': typeof PSlugRoute
@@ -203,6 +306,7 @@ export interface FileRoutesByTo {
   '/api/webhooks/mailgun': typeof ApiWebhooksMailgunRoute
   '/administrator': typeof LayoutAdministratorIndexRoute
   '/administrator/mailing/system': typeof LayoutAdministratorMailingSystemRoute
+  '/api/auth/youtube/callback': typeof ApiAuthYoutubeCallbackRoute
   '/api/public/adcombo/order': typeof ApiPublicAdcomboOrderRoute
 }
 export interface FileRoutesById {
@@ -210,8 +314,20 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_layout': typeof LayoutRouteWithChildren
   '/blog': typeof BlogRoute
+  '/calendar': typeof CalendarRoute
+  '/competitors': typeof CompetitorsRoute
+  '/creator-login': typeof CreatorLoginRoute
+  '/creator-settings': typeof CreatorSettingsRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/newsletter': typeof NewsletterRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
+  '/script': typeof ScriptRoute
+  '/seo': typeof SeoRoute
+  '/signup': typeof SignupRoute
+  '/tag-manager': typeof TagManagerRoute
+  '/upload': typeof UploadRoute
+  '/dashboard/connected': typeof DashboardConnectedRoute
   '/l/$slug': typeof LSlugRoute
   '/newsletter/confirm': typeof NewsletterConfirmRoute
   '/p/$slug': typeof PSlugRoute
@@ -229,6 +345,7 @@ export interface FileRoutesById {
   '/api/webhooks/mailgun': typeof ApiWebhooksMailgunRoute
   '/_layout/administrator/': typeof LayoutAdministratorIndexRoute
   '/_layout/administrator/mailing/system': typeof LayoutAdministratorMailingSystemRoute
+  '/api/auth/youtube/callback': typeof ApiAuthYoutubeCallbackRoute
   '/api/public/adcombo/order': typeof ApiPublicAdcomboOrderRoute
 }
 export interface FileRouteTypes {
@@ -236,8 +353,20 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/blog'
+    | '/calendar'
+    | '/competitors'
+    | '/creator-login'
+    | '/creator-settings'
+    | '/dashboard'
     | '/login'
     | '/newsletter'
+    | '/onboarding'
+    | '/script'
+    | '/seo'
+    | '/signup'
+    | '/tag-manager'
+    | '/upload'
+    | '/dashboard/connected'
     | '/l/$slug'
     | '/newsletter/confirm'
     | '/p/$slug'
@@ -255,12 +384,25 @@ export interface FileRouteTypes {
     | '/api/webhooks/mailgun'
     | '/administrator/'
     | '/administrator/mailing/system'
+    | '/api/auth/youtube/callback'
     | '/api/public/adcombo/order'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/blog'
+    | '/calendar'
+    | '/competitors'
+    | '/creator-login'
+    | '/creator-settings'
+    | '/dashboard'
     | '/login'
+    | '/onboarding'
+    | '/script'
+    | '/seo'
+    | '/signup'
+    | '/tag-manager'
+    | '/upload'
+    | '/dashboard/connected'
     | '/l/$slug'
     | '/newsletter/confirm'
     | '/p/$slug'
@@ -278,14 +420,27 @@ export interface FileRouteTypes {
     | '/api/webhooks/mailgun'
     | '/administrator'
     | '/administrator/mailing/system'
+    | '/api/auth/youtube/callback'
     | '/api/public/adcombo/order'
   id:
     | '__root__'
     | '/'
     | '/_layout'
     | '/blog'
+    | '/calendar'
+    | '/competitors'
+    | '/creator-login'
+    | '/creator-settings'
+    | '/dashboard'
     | '/login'
     | '/newsletter'
+    | '/onboarding'
+    | '/script'
+    | '/seo'
+    | '/signup'
+    | '/tag-manager'
+    | '/upload'
+    | '/dashboard/connected'
     | '/l/$slug'
     | '/newsletter/confirm'
     | '/p/$slug'
@@ -303,6 +458,7 @@ export interface FileRouteTypes {
     | '/api/webhooks/mailgun'
     | '/_layout/administrator/'
     | '/_layout/administrator/mailing/system'
+    | '/api/auth/youtube/callback'
     | '/api/public/adcombo/order'
   fileRoutesById: FileRoutesById
 }
@@ -310,18 +466,72 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LayoutRoute: typeof LayoutRouteWithChildren
   BlogRoute: typeof BlogRoute
+  CalendarRoute: typeof CalendarRoute
+  CompetitorsRoute: typeof CompetitorsRoute
+  CreatorLoginRoute: typeof CreatorLoginRoute
+  CreatorSettingsRoute: typeof CreatorSettingsRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   LoginRoute: typeof LoginRoute
   NewsletterRoute: typeof NewsletterRouteWithChildren
+  OnboardingRoute: typeof OnboardingRoute
+  ScriptRoute: typeof ScriptRoute
+  SeoRoute: typeof SeoRoute
+  SignupRoute: typeof SignupRoute
+  TagManagerRoute: typeof TagManagerRoute
+  UploadRoute: typeof UploadRoute
   LSlugRoute: typeof LSlugRoute
   PSlugRoute: typeof PSlugRoute
   ApiPublicConfirmRoute: typeof ApiPublicConfirmRoute
   ApiPublicUnsubscribeRoute: typeof ApiPublicUnsubscribeRoute
   ApiWebhooksMailgunRoute: typeof ApiWebhooksMailgunRoute
+  ApiAuthYoutubeCallbackRoute: typeof ApiAuthYoutubeCallbackRoute
   ApiPublicAdcomboOrderRoute: typeof ApiPublicAdcomboOrderRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/upload': {
+      id: '/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tag-manager': {
+      id: '/tag-manager'
+      path: '/tag-manager'
+      fullPath: '/tag-manager'
+      preLoaderRoute: typeof TagManagerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seo': {
+      id: '/seo'
+      path: '/seo'
+      fullPath: '/seo'
+      preLoaderRoute: typeof SeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/script': {
+      id: '/script'
+      path: '/script'
+      fullPath: '/script'
+      preLoaderRoute: typeof ScriptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/newsletter': {
       id: '/newsletter'
       path: '/newsletter'
@@ -334,6 +544,41 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/creator-settings': {
+      id: '/creator-settings'
+      path: '/creator-settings'
+      fullPath: '/creator-settings'
+      preLoaderRoute: typeof CreatorSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/creator-login': {
+      id: '/creator-login'
+      path: '/creator-login'
+      fullPath: '/creator-login'
+      preLoaderRoute: typeof CreatorLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/competitors': {
+      id: '/competitors'
+      path: '/competitors'
+      fullPath: '/competitors'
+      preLoaderRoute: typeof CompetitorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -384,6 +629,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/l/$slug'
       preLoaderRoute: typeof LSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/connected': {
+      id: '/dashboard/connected'
+      path: '/connected'
+      fullPath: '/dashboard/connected'
+      preLoaderRoute: typeof DashboardConnectedRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/_layout/administrator/': {
       id: '/_layout/administrator/'
@@ -476,6 +728,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAdcomboOrderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/youtube/callback': {
+      id: '/api/auth/youtube/callback'
+      path: '/api/auth/youtube/callback'
+      fullPath: '/api/auth/youtube/callback'
+      preLoaderRoute: typeof ApiAuthYoutubeCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_layout/administrator/mailing/system': {
       id: '/_layout/administrator/mailing/system'
       path: '/system'
@@ -528,6 +787,18 @@ const LayoutRouteChildren: LayoutRouteChildren = {
 const LayoutRouteWithChildren =
   LayoutRoute._addFileChildren(LayoutRouteChildren)
 
+interface DashboardRouteChildren {
+  DashboardConnectedRoute: typeof DashboardConnectedRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardConnectedRoute: DashboardConnectedRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 interface NewsletterRouteChildren {
   NewsletterConfirmRoute: typeof NewsletterConfirmRoute
   NewsletterIndexRoute: typeof NewsletterIndexRoute
@@ -546,13 +817,25 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LayoutRoute: LayoutRouteWithChildren,
   BlogRoute: BlogRoute,
+  CalendarRoute: CalendarRoute,
+  CompetitorsRoute: CompetitorsRoute,
+  CreatorLoginRoute: CreatorLoginRoute,
+  CreatorSettingsRoute: CreatorSettingsRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   LoginRoute: LoginRoute,
   NewsletterRoute: NewsletterRouteWithChildren,
+  OnboardingRoute: OnboardingRoute,
+  ScriptRoute: ScriptRoute,
+  SeoRoute: SeoRoute,
+  SignupRoute: SignupRoute,
+  TagManagerRoute: TagManagerRoute,
+  UploadRoute: UploadRoute,
   LSlugRoute: LSlugRoute,
   PSlugRoute: PSlugRoute,
   ApiPublicConfirmRoute: ApiPublicConfirmRoute,
   ApiPublicUnsubscribeRoute: ApiPublicUnsubscribeRoute,
   ApiWebhooksMailgunRoute: ApiWebhooksMailgunRoute,
+  ApiAuthYoutubeCallbackRoute: ApiAuthYoutubeCallbackRoute,
   ApiPublicAdcomboOrderRoute: ApiPublicAdcomboOrderRoute,
 }
 export const routeTree = rootRouteImport
