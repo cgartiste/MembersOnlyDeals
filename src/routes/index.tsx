@@ -94,14 +94,14 @@ function HomePage() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link to="/login">
+            <Link to="/creator-login">
               <Button variant="ghost" size="sm" className="text-sm">Sign in</Button>
             </Link>
-            <a href="#pricing">
+            <Link to="/signup">
               <Button size="sm" className="bg-gradient-to-r from-violet-600 to-pink-500 hover:opacity-90 text-white border-0 gap-1.5 text-sm">
                 Get started <ArrowRight className="h-3.5 w-3.5" />
               </Button>
-            </a>
+            </Link>
           </div>
         </div>
       </header>
@@ -142,11 +142,11 @@ function HomePage() {
                 className="flex-1 px-4 text-sm outline-none"
               />
             </div>
-            <a href="#pricing">
+            <Link to="/signup">
               <Button className="h-12 px-6 bg-gradient-to-r from-violet-600 to-pink-500 hover:opacity-90 text-white border-0 font-semibold gap-2 whitespace-nowrap">
                 <Zap className="h-4 w-4" /> Start for free
               </Button>
-            </a>
+            </Link>
           </div>
 
           <p className="mt-3 text-xs text-neutral-400">No credit card required · Free forever plan</p>
