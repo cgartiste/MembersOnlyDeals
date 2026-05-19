@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { fetchYoutubeChannel, fetchYoutubeVideos } from "@/lib/creator.server";
 import { useCreatorSession } from "@/hooks/use-creator-session";
-import { getCreator } from "@/lib/creator.server";
 import { CreatorSidebar } from "@/components/creator-sidebar";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -116,7 +115,7 @@ function DashboardPage() {
                   <div className="h-16 w-16 rounded-full bg-gradient-to-br from-violet-200 to-pink-200 animate-pulse" />
                 )}
                 <div className="flex-1">
-                  <h2 className="text-xl font-extrabold">{channel?.name ?? creator?.youtube_channel_name ?? "Votre chaîne"}</h2>
+                  <h2 className="text-xl font-extrabold">{channel?.name ?? session?.channelName ?? "Votre chaîne"}</h2>
                   <div className="flex items-center gap-4 mt-1 text-sm text-neutral-500">
                     <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {(channel?.subscribers ?? 0).toLocaleString()} abonnés</span>
                     <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {(channel?.views ?? 0).toLocaleString()} vues totales</span>
